@@ -9,11 +9,20 @@ export function ModelBox() {
     const [fileName, setFileName] = React.useState('')
     const [fileContent, setFileContent] = React.useState('')
 
-    const {  type, setIsOpen, setType, node } = ModelBoxStore()
+    const defaultContent = `
+    export function ${fileName.split('.')[0]}(){
+    return (
+    <div>
+            ${fileName.split('.')[0]} Component.
+        </div>
+    )
+    }
+    `
+
+    const { type, setIsOpen, setType, node } = ModelBoxStore()
     const { ChooseFoler, createFile, createFolder } = Creator();
 
 
-    console.log(node)
 
     function onConfirm() {
         if (node)
@@ -30,8 +39,9 @@ export function ModelBox() {
 
                 case "file":
                     ChooseFoler(node).then(() => {
-                        createFile(`/${fileName}`, fileContent).then(() => {
-                            setIsOpen(false)
+                        createFile(`${fileName}`, (fileContent.length > 5 ? fileContent : defaultContent)).then((file) => {
+                            console.log(file)
+                            // setIsOpen(false)
                         })
                     })
                     break;

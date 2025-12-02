@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ComponentStore } from "../services/zustand/store/ComponentStore";
 
 interface ItemNode {
     name: string;
@@ -9,10 +10,12 @@ interface ItemNode {
     source?: any
 }
 export default function Creator() {
+    
     const [dirHandle, setCount] = useState<FileSystemDirectoryHandle>(null!);
     const [status, setStatus] = useState("");
 
     async function ChooseFoler(node:ItemNode) {
+        console.log('Folder Choose',node)
         try {
             const handle = node.handle as FileSystemDirectoryHandle;
             setCount(handle)
@@ -22,8 +25,10 @@ export default function Creator() {
         }
     }
 
+
     // Create folder inside selected dir
     async function createFolder(folderName: string) {
+
 
         if (!dirHandle) {
             setStatus("Please choose a directory first.");
@@ -65,7 +70,42 @@ export default function Creator() {
         }
     }
 
-    return { ChooseFoler, createFolder, createFile, dirHandle };
+    async function updateFile(filePath: string, newContent: string) {
+
+        console.log(dirHandle)
+
+    if (!dirHandle) {
+        setStatus("Please choose a directory first.");
+        return;
+    }
+
+    try {
+        // Same logic as createFile → ensure folders exist
+        const parts = filePath.split("/").filter(Boolean); 
+        let current = dirHandle;
+        const fileName = parts.pop(); // actual file name
+
+        // Ensure parent folders exist
+        for (const part of parts) {
+            current = await current.getDirectoryHandle(part, { create: true });
+        }
+
+        // Access existing file or create it if missing
+        const fileHandle = await current.getFileHandle(fileName, { create: true });
+
+        // Open writable stream
+        const writable = await fileHandle.createWritable();
+        await writable.write(newContent);
+        await writable.close();
+
+        setStatus(`File "${filePath}" updated successfully.`);
+    } catch (e) {
+        setStatus("Error updating file: " + e.message);
+    }
+}
+
+
+    return { ChooseFoler, createFolder, createFile, dirHandle,updateFile };
 }
 
 

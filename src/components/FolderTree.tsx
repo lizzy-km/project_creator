@@ -17,7 +17,8 @@ export const FolderTree = ({ type }: { type: "Components" | "Source" }) => {
     const [root, setRoot] = React.useState<ItemNode | null>(null);
     const { ChooseFoler, createFile, createFolder, dirHandle } = Creator();
 
-    const { updateComponent } = ComponentStore()
+
+    const { updateComponent,updateFolderNode } = ComponentStore()
     const { setIsOpen, setType, setNode, isOpen } = ModelBoxStore()
 
 
@@ -62,7 +63,7 @@ export const FolderTree = ({ type }: { type: "Components" | "Source" }) => {
         if (root)
             readDirectory((root.handle as FileSystemDirectoryHandle), String(root.name ?? '')
             ).then(updatedRoot => setRoot(updatedRoot))
-    }, [isOpen,setRoot])
+    }, [isOpen, setRoot])
 
     // When folder clicked: load children
     const toggleFolder = async (node: ItemNode) => {
@@ -90,6 +91,44 @@ export const FolderTree = ({ type }: { type: "Components" | "Source" }) => {
     };
 
 
+    function iconColor(type: string) {
+        switch (type) {
+            case "css":
+                return "#03A6A1"
+
+                break;
+            case "js":
+                return "#FFC107"
+
+                break;
+            case "ts":
+                return "#169976"
+
+                break;
+            case "jsx":
+                return "#06923E"
+
+                break;
+            case "tsx":
+                return "#169976"
+
+                break;
+            case "json":
+                return "#FFC107"
+
+                break;
+            case "html":
+                return "#BB3E00"
+
+                break;
+
+
+            default:
+                return "#BB3E00"
+                break;
+        }
+    }
+
 
 
 
@@ -102,7 +141,7 @@ export const FolderTree = ({ type }: { type: "Components" | "Source" }) => {
             <div className={type} key={node.name} style={{ marginLeft: 20 }}>
 
                 {
-                    node.name.split('.')[1] !== "ts" && <div className="folder_item"
+                    <div className="folder_item"
                         style={{
                             cursor: node.kind === "directory" ? "pointer" : "default",
                             transition: "all .2s"
@@ -128,8 +167,11 @@ export const FolderTree = ({ type }: { type: "Components" | "Source" }) => {
                         </div>
 
                         <div onClick={() => {
-                            if (node.kind === "file") {
-                                console.log(node.name)
+                            if (node.kind === "file" &&
+                                node.name.split('.')[node.name.split('.').length - 1] === 'tsx'
+                            ) {
+
+
 
                                 if (node.name.split('.')[1] !== "ts") {
 
@@ -155,16 +197,25 @@ export const FolderTree = ({ type }: { type: "Components" | "Source" }) => {
                                 }
                                 // updateComponent(node.handle as unknown as React.JSX.Element)
                             }
-
+                            if (node.kind !== "file") { updateFolderNode(node) }
 
                         }} className=" folder_props " >
-                            <div>{node.kind === "directory" ? (node.isOpen ? "📂" : "📁") : "📄"}{" "}</div>
+                            <div  >{node.kind === "directory" ? (node.isOpen ? "📂" : "📁") :
+                                <div style={{
+
+                                    color: iconColor(node.name.split('.')[node.name.split('.').length - 1]),
+                                    fontWeight: 400,
+                                    backgroundColor: `${iconColor(node.name.split('.')[node.name.split('.').length - 1])}18`,
+                                    padding: 4,
+                                    borderRadius: 4
+                                }} >{node.name.split('.')[node.name.split('.').length - 1].toUpperCase()}</div>}{" "}</div>
                             <p>{node.name}</p>
 
                         </div>
 
 
                         <div className="add_icon" onClick={() => {
+
                             ChooseFoler(node).then(() => {
                                 setIsOpen(true)
                                 setNode(node)

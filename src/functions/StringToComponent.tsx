@@ -2,9 +2,9 @@ import * as Babel from "@babel/standalone";
 import React from "react";
 import { ComponentRegistry } from "../ui/Buttons/ComponentsRegistry";
 import { ComponentStore } from "../services/zustand/store/ComponentStore";
-import {FolderTree} from "../components/FolderTree";
 import Creator from "./Creator";
 import { ArrowIcon } from "../assets/icon/Exported";
+import { ExportedComponents } from "../components/ExportedComponent";
 
 
 // export async function compileAndLoad (codeVal:string){
@@ -17,14 +17,13 @@ export const StringToComponent = ({ name, code }: { name: string, code: string }
 
 
     const source = code.replace(
-    /import\s*{([^}]+)}\s*from\s*['"]([^'"]+)['"];?/g,
-   ''
-  ).replace(/export\s?/g, "").replace(
-    /import\s*([^}]+)\s*from\s*['"]([^'"]+)['"];?/g,
-   ''
-  )
+        /import\s*{([^}]+)}\s*from\s*['"]([^'"]+)['"];?/g,
+        ''
+    ).replace(/export\s?/g, "").replace(
+        /import\s*([^}]+)\s*from\s*['"]([^'"]+)['"];?/g,
+        ''
+    )
 
-  console.log(source)
 
     const compiled: string = Babel.transform(source, {
         presets: [
@@ -34,10 +33,12 @@ export const StringToComponent = ({ name, code }: { name: string, code: string }
 
     }).code ?? ''
 
+    // console.log(code,"compiled Code ")
 
-    // console.log(compiled)
 
 
-    const DynamicComponent = new Function('React', "ComponentRegistry","ComponentStore","StringToComponent","Creator","ArrowIcon ", ` ${compiled} \n return ${name.split('.')[0]}`)(React, ComponentRegistry,ComponentStore,StringToComponent,Creator,ArrowIcon);
-    return DynamicComponent;
-};
+
+    const DynamicComponent = new Function('React', "ComponentRegistry", "ComponentStore", "StringToComponent", "Creator", "ArrowIcon ","ExportedComponents", ` ${compiled} \n return ${name.split('.')[0]}`)(React, ComponentRegistry, ComponentStore, StringToComponent, Creator, ArrowIcon,ExportedComponents);
+
+    return  DynamicComponent;
+}
