@@ -1,35 +1,66 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+import './App.css'
+import {FolderTree} from './components/FolderTree';
+import { ComponentStore } from './services/zustand/store/ComponentStore';
+import { StringToComponent } from './functions/StringToComponent';
+import { ModelBoxStore } from './services/zustand/store/ModelBoxStore';
+import { ModelBox } from './components/ModelBox';
+
+
+
+export  function App() {
+
+
+  const { Component } = ComponentStore()
+
+  const {isOpen} = ModelBoxStore()
+  const ReactCom = StringToComponent(Component)
+
+
+
+
+
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+
+    <div className="parent h-full">
+      
+
+      <div style={{
+        visibility:isOpen? 'visible' :'hidden'
+      }} className=' model ' >
+
+        //Box
+
+        <div style={{
+              transform: "translateY(100px)"
+
+        }} className='model_box' >
+
+          <ModelBox/>
+
+        </div>
+
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+      
+      <div className="component h-full ">
+        <FolderTree type={"Components"} />
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+      <div className="folder h-full">
+        <FolderTree type={"Source"} />
+      </div>
+      <div className="content h-full">
+        <div className="" >
+          <h2>Preview</h2>
+          {Component.code.length > 0 ? <ReactCom label="Button" onClick={() => console.log("Clicked")} />
+            : <div>No Component Selected</div>}
+        </div>
+      </div>
+      <div className="header">
+        Header
+      </div>
+    </div>
+
   )
 }
 
-export default App
