@@ -1,8 +1,10 @@
 import Creator from "../functions/Creator";
 import { ArrowIcon } from "../assets/icon/Exported";
 import { ComponentStore } from "../services/zustand/store/ComponentStore";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { ModelBoxStore } from "../services/zustand/store/ModelBoxStore";
+import { NavLink, useNavigate, useParams, type Params } from "react-router-dom";
+import { FolderWatcher } from "../functions/FolderWatcher";
 
 interface ItemNode {
     name: string;
@@ -15,10 +17,15 @@ interface ItemNode {
 
 export const FolderTree = ({ type }: { type: "Components" | "Source" }) => {
     const [root, setRoot] = React.useState<ItemNode | null>(null);
-    const { ChooseFoler, createFile, createFolder, dirHandle } = Creator();
+    const { ChooseFoler, dirHandle } = Creator();
+
+    const navigate = useNavigate()
+    const param: Readonly<Params<string>> = useParams()
+
+    const paths = param['*']?.split('/')
 
 
-    const { updateComponent,updateFolderNode } = ComponentStore()
+    const { updateComponent, updateFolderNode, folderNode } = ComponentStore()
     const { setIsOpen, setType, setNode, isOpen } = ModelBoxStore()
 
 
@@ -27,6 +34,8 @@ export const FolderTree = ({ type }: { type: "Components" | "Source" }) => {
     const pickFolder = async () => {
         const dirHandle = await window.showDirectoryPicker();
         const node = await readDirectory(dirHandle, dirHandle.name);
+
+
         setRoot(node);
     };
 
@@ -62,12 +71,15 @@ export const FolderTree = ({ type }: { type: "Components" | "Source" }) => {
     useEffect(() => {
         if (root)
             readDirectory((root.handle as FileSystemDirectoryHandle), String(root.name ?? '')
-            ).then(updatedRoot => setRoot(updatedRoot))
+            ).then(updatedRoot => {
+                setRoot(updatedRoot)
+
+            })
     }, [isOpen, setRoot])
 
     // When folder clicked: load children
     const toggleFolder = async (node: ItemNode) => {
-        if (node.kind === "file") return;
+        if (node?.kind === "file") return;
 
         node.isOpen = !node.isOpen;
 
@@ -130,11 +142,40 @@ export const FolderTree = ({ type }: { type: "Components" | "Source" }) => {
     }
 
 
+    const target = root ? (root.children?.find(val => val.name === 'features')) : false
+
+    let targetDir: ItemNode
 
 
 
-    const renderNode = (node: ItemNode) => {
 
+    // useEffect(() => {
+
+    //     console.log(target)
+
+       
+
+    //     toggleFolder(target).then(() => {
+    //         console.log('toggled')
+    //     })
+
+    // }, [target])
+
+
+
+
+
+    const RenderNode = (node: ItemNode) => {
+
+
+        // useEffect(() => {
+        //     if (target?.kind === 'directory' && target) {
+        //         readDirectory((target?.handle as FileSystemDirectoryHandle), target?.name).then((dta) => {
+        //             console.log(dta)
+        //             targetDir = dta as ItemNode
+        //         })
+        //     }
+        // }, [])
 
 
         return (
@@ -148,6 +189,9 @@ export const FolderTree = ({ type }: { type: "Components" | "Source" }) => {
                         }}
                         onClick={() => {
                             ChooseFoler(node)
+                            if (!paths?.includes(node.name) && node.kind === "directory") {
+                                navigate(node.name)
+                            }
                         }}
                     >
 
@@ -203,12 +247,12 @@ export const FolderTree = ({ type }: { type: "Components" | "Source" }) => {
                             <div  >{node.kind === "directory" ? (node.isOpen ? "📂" : "📁") :
                                 <div style={{
 
-                                    color: iconColor(node.name.split('.')[node.name.split('.').length - 1]),
+                                    color: iconColor(node.name?.split('.')[node.name?.split('.').length - 1]),
                                     fontWeight: 400,
-                                    backgroundColor: `${iconColor(node.name.split('.')[node.name.split('.').length - 1])}18`,
+                                    backgroundColor: `${iconColor(node.name?.split('.')[node.name?.split('.').length - 1])}18`,
                                     padding: 4,
                                     borderRadius: 4
-                                }} >{node.name.split('.')[node.name.split('.').length - 1].toUpperCase()}</div>}{" "}</div>
+                                }} >{node.name?.split('.')[node.name?.split('.').length - 1].toUpperCase()}</div>}{" "}</div>
                             <p>{node.name}</p>
 
                         </div>
@@ -235,17 +279,18 @@ export const FolderTree = ({ type }: { type: "Components" | "Source" }) => {
 
                 {/* Render children only if folder opened */}
                 {node.isOpen &&
-                    node.children?.map((child) => renderNode(child))}
+                    node.children?.map((child) => RenderNode(child))}
             </div>
         );
     };
 
     return (
         <div>
+
             <button onClick={pickFolder}>Select {type}</button>
 
             <div style={{ marginTop: 20 }}>
-                {root ? renderNode(root) : `No ${type} selected`}
+                {root ? RenderNode(root) : `No ${type} selected`}
             </div>
         </div>
     );

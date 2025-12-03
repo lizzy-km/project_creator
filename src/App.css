@@ -81,7 +81,7 @@ body {
 }
 
 .folder {
-  grid-area: 2 / 2 / 3 / 3;
+  grid-area: 2 / 1 / 3 / 3;
   background-color: #232323;
   color: white;
   padding: 10px;

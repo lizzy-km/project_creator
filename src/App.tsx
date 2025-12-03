@@ -5,7 +5,7 @@ import { ComponentStore } from './services/zustand/store/ComponentStore';
 import { StringToComponent } from './functions/StringToComponent';
 import { ModelBoxStore } from './services/zustand/store/ModelBoxStore';
 import { ModelBox } from './components/ModelBox';
-import {  useEffect,  useState } from 'react';
+import { useEffect, useState } from 'react';
 import Creator from './functions/Creator';
 
 
@@ -13,36 +13,36 @@ import Creator from './functions/Creator';
 export function App() {
 
 
-  const { Component, updateComponent,folderNode } = ComponentStore()
+  const { Component, updateComponent, folderNode } = ComponentStore()
   const [isCode, setIsCode] = useState(false)
-    const { isOpen } = ModelBoxStore()
+  const { isOpen } = ModelBoxStore()
 
 
   const [code, setCode] = useState<string>(Component.code)
 
-  const {ChooseFoler,updateFile} = Creator()
+  const { ChooseFoler, updateFile } = Creator()
+      console.log(folderNode, "IsFolderNode")
 
 
   useEffect(() => {
-if(folderNode)
-
- { console.log(folderNode)
-    ChooseFoler(folderNode).then(()=>{
-      updateFile(`${Component.name}`,code).then(()=>{
-        console.log('Update Successed')
+    if (folderNode) {
+      ChooseFoler(folderNode).then(() => {
+        updateFile(`${Component.name}`, code).then(() => {
+          console.log('Update Successed')
+        })
       })
-    })
 
-    updateComponent({
-      name: Component.name,
-      code: code
-    })}
+      updateComponent({
+        name: Component.name,
+        code: code
+      })
+    }
   }, [isCode])
 
 
-  useEffect(()=>{
+  useEffect(() => {
     setCode(Component.code)
-  },[Component])
+  }, [Component])
 
 
 
@@ -93,9 +93,9 @@ if(folderNode)
 
       </div>
 
-      <div className="component h-full ">
+      {/* <div className="component h-full ">
         <FolderTree type={"Components"} />
-      </div>
+      </div> */}
       <div className="folder h-full">
         <FolderTree type={"Source"} />
       </div>
@@ -172,7 +172,7 @@ if(folderNode)
                 overflow: 'auto',
                 padding: 20,
                 borderRadius: 8,
-                filter:"invert(1)"
+                filter: "invert(1)"
 
               }}
                 value={code}

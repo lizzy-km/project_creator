@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ComponentStore } from "../services/zustand/store/ComponentStore";
+import { useParams } from "react-router-dom";
 
 interface ItemNode {
     name: string;
@@ -24,6 +25,29 @@ export default function Creator() {
             console.error(err);
         }
     }
+
+    async function openFolderByPath(path: string, root: FileSystemDirectoryHandle) {
+    const segments = path.split("/").filter(Boolean);
+    let current = root;
+
+    for (const seg of segments) {
+        try {
+            current = await current.getDirectoryHandle(seg);
+        } catch (e) {
+            console.error("Folder not found:", seg);
+            return null;
+        }
+    }
+
+    // Read children of this folder
+    const children = [];
+    for await (const [name, handle] of current.entries()) {
+        children.push({ name, handle, type: handle.kind });
+    }
+
+    return { handle: current, children };
+}
+
 
 
     // Create folder inside selected dir
@@ -105,7 +129,10 @@ export default function Creator() {
 }
 
 
-    return { ChooseFoler, createFolder, createFile, dirHandle,updateFile };
+
+
+
+    return { ChooseFoler, createFolder, createFile, dirHandle,updateFile,openFolderByPath };
 }
 
 
